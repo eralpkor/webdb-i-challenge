@@ -3,9 +3,14 @@ const validateAccount = require('../middleware/middleware.js');
 // database
 const db = require('../data/dbConfig.js');
 
-// Basic site to '/'
+// Basic site to '/api/accounts'
 router.get('/', (req, res) => {
-  db.select('*').from('accounts')
+  const sortby = req.query.sortby === 'name' ? 'name' : req.query.sortby === 'budget' ? 'budget' : 'id';
+  const sortdir = req.query.sortdir === 'desc' ? 'decs' : 'acs';
+
+  db('accounts') // shortcut to db.select('*).from('accounts')
+    .limit(req.query.limit)
+    .orderBy(sortby, sortdir)
     .then(accounts => {
       res.status(200).json(accounts);
     })
@@ -18,8 +23,7 @@ router.get('/', (req, res) => {
 // get by id
 router.get('/:id', (req, res) => {
   console.log(req.params.id)
-  db.select('*')
-    .from('accounts')
+  db('accounts')
     .where('id', '=', req.params.id)
     .first() // to get object
       .then(account => {
